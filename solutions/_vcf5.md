@@ -1,11 +1,10 @@
 You can estimate the raw number of variant by type after merging each sample using the following command:
 
 ```
-bcftools view SVvariants/sv.bcf | grep -v "^#" | awk ' {print $5} ' | sort | uniq -c 
-
+for bcf in SVvariants/*.bcf; do basename $bcf .bcf; bcftools view $bcf | awk '/^[^#]/ {print $5}' | sort | uniq -c; done | paste - - - -
 ```
 
-You should get:
+You should get the following numbers:
 
 |Sample|Deletion|Duplication|Inversion|
 |--|--|--|--|
