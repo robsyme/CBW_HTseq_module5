@@ -1,6 +1,6 @@
 You can estimate the raw number of variant by type after merging each sample using the following command:
 
-```
+```bash
 for bcf in SVvariants/*.bcf; do
   basename $bcf .bcf
   bcftools view $bcf \
