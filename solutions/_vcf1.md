@@ -9,6 +9,8 @@ done | paste - - | column -t
 
 You should get:
 
+|Sample|count|
+|--|--|
 |NA12878|123|
 |NA12891|155|
 |NA12892|132|
