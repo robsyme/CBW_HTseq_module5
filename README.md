@@ -150,34 +150,37 @@ This step has been done for you in the interest of time, but the commands are sh
 
 In the alignment commands, note the use of the -M parameter to mark shorter split hits as secondary.
 
-
 ```
+### NOTE: These preparatory commands have already been run for you and the outputs supplied.
+###       The code is given here as a reference only.
+###       You don't need to run this block.
+
 ## Index reference genome ##
-# bwa index reference/hg19.fa
+bwa index reference/hg19.fa
 
 
 ## Align NA12878 ##
-# bwa mem -M -t 2 \
-#   reference/hg19.fa \
-#   fastq/NA12878_S1.chr20.20X.1.fq \
-#   fastq/NA12878_S1.chr20.20X.2.fq \
-# | samtools view -S -b - > bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam
+bwa mem -M -t 2 \
+  reference/hg19.fa \
+  fastq/NA12878_S1.chr20.20X.1.fq \
+  fastq/NA12878_S1.chr20.20X.2.fq \
+| samtools view -S -b - > bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam
 
 
 ## Align NA12891 ##
-# bwa mem -M -t 2 \
-#   reference/hg19.fa \
-#   fastq/NA12891_S1.chr20.20X.1.fq \
-#   fastq/NA12891_S1.chr20.20X.2.fq \
-# | samtools view -S -b - > bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam
+bwa mem -M -t 2 \
+  reference/hg19.fa \
+  fastq/NA12891_S1.chr20.20X.1.fq \
+  fastq/NA12891_S1.chr20.20X.2.fq \
+| samtools view -S -b - > bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam
 
 
 ## Align NA12892 ##
-# bwa mem -M -t 2 \
-#   reference/hg19.fa \
-#   fastq/NA12892_S1.chr20.20X.1.fq \
-#   fastq/NA12892_S1.chr20.20X.2.fq \
-# | samtools view -S -b - > bam/NA1289/NA12892_S1.chr20.20X.pairs.readSorted.bam
+bwa mem -M -t 2 \
+  reference/hg19.fa \
+  fastq/NA12892_S1.chr20.20X.1.fq \
+  fastq/NA12892_S1.chr20.20X.2.fq \
+| samtools view -S -b - > bam/NA1289/NA12892_S1.chr20.20X.pairs.readSorted.bam
 ```
 
 
