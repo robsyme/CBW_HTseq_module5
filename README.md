@@ -244,28 +244,21 @@ samtools view bam/NA12892/NA12892_S1.chr20.20X.pairs.readSorted.bam \
 
 Let's take a peak at the first few lines of the histogram file that was produced:
 
-```bash
-head -n 10 SVvariants/NA12878_S1.chr20.20X.pairs.histo
+```console
+[user@node1 Module5]$ head -n 10 SVvariants/NA12878_S1.chr20.20X.pairs.histo
+0       0.0
+1       0.00020046106043900973
+2       0.00030069159065851457
+3       0.00030069159065851457
+4       0.00020046106043900973
+5       0.00020046106043900973
+6       0.00030069159065851457
+7       0.00010023053021950487
+8       0.00010023053021950487
+9       0.00010023053021950487
 ```
 
-Expected results:
->0  &nbsp;&nbsp;&nbsp;&nbsp; 0.0   
->1  &nbsp;&nbsp;&nbsp;&nbsp; 0.000200461060439   
->2  &nbsp;&nbsp;&nbsp;&nbsp; 0.000300691590659   
->3  &nbsp;&nbsp;&nbsp;&nbsp; 0.000300691590659   
->4  &nbsp;&nbsp;&nbsp;&nbsp; 0.000200461060439   
->5  &nbsp;&nbsp;&nbsp;&nbsp; 0.000200461060439   
->6  &nbsp;&nbsp;&nbsp;&nbsp; 0.000300691590659   
->7  &nbsp;&nbsp;&nbsp;&nbsp; 0.00010023053022   
->8  &nbsp;&nbsp;&nbsp;&nbsp; 0.00010023053022   
->9  &nbsp;&nbsp;&nbsp;&nbsp; 0.00010023053022   
-
-
-Let's use R to plot the fragment size distribution. 
-
-
-
-First, launch R from the command line.
+Let's use R to plot the fragment size distribution. First, launch R from the command line.
 
 ```bash
 R
