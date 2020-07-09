@@ -1,10 +1,10 @@
 You can estimate the raw number of variant by type in each sample using the following command:
 
-```
-for i in SVvariants/*bcf ; do \
- echo $i ; \
- bcftools view $i | grep -v "^#" | awk ' {print $5} ' | sort | uniq -c  ;  \
-done
+```bash
+for bcf in SVvariants/*.bcf; do
+  basename bcf .bcf
+  bcftools view --no-header bcf | awk '{print $5}' | sort | uniq -c
+done | paste - - - -
 ```
 
 |Sample|Deletion|Duplication|Inversion|
