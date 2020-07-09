@@ -1,11 +1,11 @@
 ---
 layout: tutorial_page
-permalink: /htseq_2019_module5_lab
+permalink: /htseq_2020_module5_lab
 title: HTSeq Lab 5
 header1: Workshop Pages for Students
 header2: Informatics on High-Throughput Sequencing Data Module 5 Lab
 image: /site_images/CBW_High-throughput_icon.jpg
-home: https://bioinformaticsdotca.github.io/htseq_2019
+home: https://bioinformaticsdotca.github.io/htseq_2020
 ---
 
 -----------------------
@@ -16,9 +16,8 @@ home: https://bioinformaticsdotca.github.io/htseq_2019
 
 # CBW HT-seq Module 5 - Structural Variant Calling   
 
- Created by Mathieu Bourgey, _Ph.D_, then modified by Pascale Marquis
-
-
+ Created by Mathieu Bourgey, _Ph.D_, then modified by Pascale Marquis and Rob Syme
+ 
 
 ## Table of contents
 1. [Introduction](#introduction)
@@ -29,9 +28,6 @@ home: https://bioinformaticsdotca.github.io/htseq_2019
 5. [Setting up IGV for SV visualization](#IGV)
 6. [Explore the SVs](#explore)
 7. [Acknowledgements](#ackno)
-
-
-
 
 
 ## Introduction
@@ -86,20 +82,36 @@ If you are interested in DELLY, you can read the full manuscript [here](http://b
 
 ### Environment setup
 
+### Accessing a working node
+
+When you log into the server, you are assigned to a "login" node (sometimes called a "head node"), which is shared by other users who are also logged in. As these nodes are a shared resouces, running computationally heavy workloads here can make the system unstable for everybody. In order to run your analysis in a stable environment without affecting other user you need to access a work node (sometimes called a "compute node"). Usually each job shoule be launched through the scheduler to run in a working environment, but our jobs in this workshop as are small and fast, so we can instead launch an interactive session on one of the work nodes by running:
+
+```bash
+salloc --mem 0 -n 8
 ```
-#set up
 
+The salloc command will assign us to a compute node and give us permission to use up to 8 cpus at a time. The interactive session will last for 1h, after which our session will end and we will be returned to the login node.
 
-docker run --privileged -v /tmp:/tmp --network host -it -w $PWD -v $HOME:$HOME -v /media:/media --user $UID:$GROUPS -v /etc/group:/etc/group -v /etc/passwd:/etc/passwd c3genomics/genpipes:0.8
-export WORK_DIR_M5=$HOME/workspace/HTseq/Module5/
-export REF=$HOME/workspace/HTseq/Module5/reference
-mkdir -p $WORK_DIR_M5
-cd $WORK_DIR_M5
+### Setting up the workspace
+
+We'll create a directory in which to do the module 5 lab:
+
+```bash
+export WORK_DIR_M3=$HOME/workspace/HTseq/Module5
+mkdir -p $WORK_DIR_M3
+cd $WORK_DIR_M3
 ln -s $HOME/CourseData/HT_data/Module5/* .
 
-
-module load mugqic/java/openjdk-jdk1.8.0_72 mugqic/bvatools/1.6 mugqic/samtools/1.9 mugqic/GenomeAnalysisTK/4.1.0.0 mugqic/R_Bioconductor/3.5.0_3.7 mugqic/bcftools/1.6 mugqic/tabix/0.2.6 mugqic/Delly/0.7.8
-
+module load \
+  mugqic/GenomeAnalysisTK/4.1.0.0 \
+  mugqic/java/openjdk-jdk1.8.0_72 \
+  mugqic/R_Bioconductor/3.5.0_3.7 \
+  mugqic/samtools/1.10 \
+  mugqic/bvatools/1.6 \
+  mugqic/bcftools/1.6 \
+  mugqic/tabix/0.2.6 \
+  mugqic/Delly/0.7.8 \
+  mugqic/bwa/0.7.17
 ```
 
 ***Note:***
@@ -111,14 +123,18 @@ The initial structure of your folders should look like this:
 
 
 ```
-ROOT
-|-- bam/               # bam files (down sampled)
-    `-- NA12878/             # Child sample directory
-    `-- NA12891/             # Father sample directory
-    `-- NA12892/             # Mother sample directory
-`-- reference/               # hg19 reference and indexes
-`-- scripts/                 # command lines scripts
-`-- saved_results/           # precomputed final files
+[user@node1 ref]$ cd $WORK_DIR_M3
+[user@node1 ref]$ tree -d *
+bam
+├── NA12878
+├── NA12891
+└── NA12892
+fastq
+reference
+saved_results
+├── Moleculo_bam
+└── SVvariants
+scripts
 ```
 
 ### Cheat sheets
@@ -136,36 +152,33 @@ This step has been done for you in the interest of time, but the commands are sh
 In the alignment commands, note the use of the -M parameter to mark shorter split hits as secondary.
 
 
-
 ```
-#################
-#Align NA12878 #
-#################
-#bwa mem reference/hg19.fa \
-#fastq/NA12878_S1.chr20.20X.1.fq \
-#fastq/NA12878_S1.chr20.20X.2.fq \
-#-M -t 2| samtools view -S -b - \
-#> bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam
+## Index reference genome ##
+# bwa index reference/hg19.fa
 
 
-#################
-#Align NA12891 #
-#################
-#bwa mem reference/hg19.fa \
-#fastq/NA12891_S1.chr20.20X.1.fq \
-#fastq/NA12891_S1.chr20.20X.2.fq \
-#-M -t 2 | samtools view -S -b - \
-#> bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam
+## Align NA12878 ##
+# bwa mem -M -t 2 \
+#   reference/hg19.fa \
+#   fastq/NA12878_S1.chr20.20X.1.fq \
+#   fastq/NA12878_S1.chr20.20X.2.fq \
+# | samtools view -S -b - > bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam
 
 
-#################
-#Align NA12892 #
-#################
-#bwa mem reference/hg19.fa \
-#fastq/NA12892_S1.chr20.20X.1.fq \
-#fastq/NA12892_S1.chr20.20X.2.fq \
-#-M -t 2 | samtools view -S -b - \
-#> bam/NA1289/NA12892_S1.chr20.20X.pairs.readSorted.bam
+## Align NA12891 ##
+# bwa mem -M -t 2 \
+#   reference/hg19.fa \
+#   fastq/NA12891_S1.chr20.20X.1.fq \
+#   fastq/NA12891_S1.chr20.20X.2.fq \
+# | samtools view -S -b - > bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam
+
+
+## Align NA12892 ##
+# bwa mem -M -t 2 \
+#   reference/hg19.fa \
+#   fastq/NA12892_S1.chr20.20X.1.fq \
+#   fastq/NA12892_S1.chr20.20X.2.fq \
+# | samtools view -S -b - > bam/NA1289/NA12892_S1.chr20.20X.pairs.readSorted.bam
 ```
 
 
@@ -177,7 +190,7 @@ In the alignment commands, note the use of the -M parameter to mark shorter spli
 
 Before we can attempt to identify structural variants via discordant alignments, we must first characterize the insert size distribution 
 
-**What means the insert size distribution ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_fragment1.md)
+**What do we mean by "the insert size distribution"?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_fragment1.md)
 
 **How can we use the fragment size distribution in SV detection ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_fragment2.md)
 
@@ -186,36 +199,36 @@ The following script, taken from LUMPY extracts F/R pairs from a BAM file and co
 
 Let's calculate the fragment distribution for the three dataset: 
 
-```
-#NA12878
+```bash
+# NA12878
 mkdir -p SVvariants
 samtools view bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam \
-     | python scripts/pairend_distro.py \
-     -r 101 \
-     -X 4 \
-     -N 10000 \
-     -o SVvariants/NA12878_S1.chr20.20X.pairs.histo \
- > SVvariants/NA12878_S1.chr20.20X.pairs.params
+| python scripts/pairend_distro.py \
+  -r 101 \
+  -X 4 \
+  -N 10000 \
+  -o SVvariants/NA12878_S1.chr20.20X.pairs.histo \
+> SVvariants/NA12878_S1.chr20.20X.pairs.params
 
 
-#NA12891 
+# NA12891 
 samtools view bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam \
-     | python scripts/pairend_distro.py \
-     -r 101 \
-     -X 4 \
-     -N 10000 \
-     -o SVvariants/NA12891_S1.chr20.20X.pairs.histo \
- > SVvariants/NA12891_S1.chr20.20X.pairs.params
+| python scripts/pairend_distro.py \
+  -r 101 \
+  -X 4 \
+  -N 10000 \
+  -o SVvariants/NA12891_S1.chr20.20X.pairs.histo \
+> SVvariants/NA12891_S1.chr20.20X.pairs.params
 
 
-#NA12892. 
+# NA12892
 samtools view bam/NA12892/NA12892_S1.chr20.20X.pairs.readSorted.bam \
-     | python scripts/pairend_distro.py \
-     -r 101 \
-     -X 4 \
-     -N 10000 \
-     -o SVvariants/NA12892_S1.chr20.20X.pairs.histo \
- > SVvariants/NA12892_S1.chr20.20X.pairs.params
+| python scripts/pairend_distro.py \
+  -r 101 \
+  -X 4 \
+  -N 10000 \
+  -o SVvariants/NA12892_S1.chr20.20X.pairs.histo \
+> SVvariants/NA12892_S1.chr20.20X.pairs.params
 ```
 
 `-r` specifies the read length
@@ -258,7 +271,7 @@ R
 
 Now, within R, execute the following commands:
 
-```
+```R
 size_dist <- read.table('SVvariants/NA12878_S1.chr20.20X.pairs.histo')
 pdf(file = "SVvariants/fragment.hist.pdf") 
 layout(matrix(1:3))
@@ -269,19 +282,33 @@ size_dist <- read.table('SVvariants/NA12892_S1.chr20.20X.pairs.histo')
 plot(size_dist[,1], size_dist[,2], type='h', main="NA12892 insert size") 
 dev.off()
 quit("no")
-
 ```
 
-At this point, you should have the following files: 
+At this point, you should have the following files:
 
-Let's look at the 3 PDF files : 
+```shell
+[user@node1 Module5]$ tree SVvariants/
+SVvariants/
+├── fragment.hist.pdf
+├── NA12878_S1.chr20.20X.pairs.histo
+├── NA12878_S1.chr20.20X.pairs.params
+├── NA12891_S1.chr20.20X.pairs.histo
+├── NA12891_S1.chr20.20X.pairs.params
+├── NA12892_S1.chr20.20X.pairs.histo
+└── NA12892_S1.chr20.20X.pairs.params
+```
 
-open a web browser on your laptop, and navigate to `http://XX.oicrcbw.ca`, where `XX` is the id of your node. You should be able to find there the directory hierarchy under `~/workspace/` on your node. open `HTseq/Module5/SVvariants` folder and open the pdf `fragment.hist.pdf`
+To look at the fragment.hist.pdf file we generated, we'll need to copy it from the cluster to our local computer. If you used the same directory names as I have, the pdf should be located at `~/workspace/HTseq/Module5/SVvariants/fragment.hist.pdf`. If you have used different directory names, be sure to change the path in the command below.
 
+On your *local* computer, run:
 
-Spend some time thinking about what this plot means for identifying discordant alignments.
+```bash
+rsync YOURUSERNAMEHERE@login1.CBW.calculquebec.cloud:~/workspace/HTseq/Module5/SVvariants/fragment.hist.pdf .
+```
 
-**What does the mean fragment size appear to be? Are all 3 graphs the same?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_insert1.md)
+This will copy the file onto your local computer where you can view the distributions. Spend some time thinking about what this plot means for identifying discordant alignments.
+
+**What does the mean fragment size appear to be? Are all 3 graphs the same?** [solution](./solutions/_insert1.md)
 
 
 ## SV detection
@@ -292,70 +319,103 @@ For germline SVs, calling is done by sample or in small batches to increase SV s
 Here are the steps adapted from the DELLY [readme](https://github.com/tobiasrausch/delly/blob/master/README.md).
 
 
-
 ### First call
 
-Let's call SVs:
+We've used Delly to call SVs.
 
+```bash
+# NA12878
+delly call \
+ --genome reference/hg19.fa \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12878.bcf \
+ bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
+
+## NA12891
+delly call \
+ --genome reference/hg19.fa \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12891.bcf \
+ bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
+
+# NA12892
+delly call \
+ --genome reference/hg19.fa \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12892.bcf \
+ bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
 ```
-#NA12878
-#delly call -g reference/hg19.fa -o SVvariants/NA12878.bcf -x reference/hg19.excl bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
-
-#NA12891
-#delly call -g reference/hg19.fa -o SVvariants/NA12891.bcf -x reference/hg19.excl bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
-
-#NA12892
-#delly call -g reference/hg19.fa -o SVvariants/NA12892.bcf -x reference/hg19.excl bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
-```
 
 
-`.bcf` files are compressed vcf files. To look at the output you can use bcftools
+The `.bcf` output files are compressed (binary) vcf files. To inspect the output from the NA12878 sample, run:
 
-
-```
+```bash
 bcftools view SVvariants/NA12878.bcf | less -S
 ```
 
 
+***Cheat:*** These commands take a little under 5 minutes each to run. If these commands are taking too long, simply run the command `cp saved_results/SVvariants/NA128*[128].bc* SVvariants/`
 
-***Cheat:*** If these commands are taking too long, simply run the command `cp saved_results/SVvariants/NA128*[128].bc* SVvariants/`
+**How many variants delly found in each sample ?** [solution](./solutions/_vcf1.md)
 
-**How many variants delly found in each sample ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_vcf1.md)
-
-**How many variants by SV type are found in each sample ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_vcf4.md)
+**How many variants by SV type are found in each sample ?** [solution](./solutions/_vcf4.md)
 
 ### Merge calls
 
 We need to merge the SV sites into a unified site list:
 
-```
-delly merge -m 500 -n 1000000 -o SVvariants/sv.bcf -b 500 -r 0.5 SVvariants/NA12878.bcf SVvariants/NA12891.bcf SVvariants/NA12892.bcf
+```bash
+delly merge \
+ --minsize 500 \
+ --maxsize 1000000 \
+ --bp-offset 500 \
+ --rec-overlap 0.5 \
+ --outfile SVvariants/sv.bcf \
+ SVvariants/NA12878.bcf SVvariants/NA12891.bcf SVvariants/NA12892.bcf
 ```
 
 Look at the output:
 
-```
+```bash
 bcftools view SVvariants/sv.bcf | less -S
 ```
 
-**How many variants by SV type are found ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_vcf5.md)
 
-**What can you notice something different from the individual bcf ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_vcf2.md)
+**How many variants by SV type are found ?** [solution](./solutions/_vcf5.md)
+
+**What can you notice something different from the individual bcf ?** [solution](./solutions/_vcf2.md)
 
 
 ### Re-genotype in all samples
 
 We need to re-genotype the merged SV site list across all samples. This can be run in parallel for each sample.
 
-```
-#NA12878
-delly call -g reference/hg19.fa -v SVvariants/sv.bcf -o SVvariants/NA12878.geno.bcf -x reference/hg19.excl bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
+```bash
+# NA12878
+delly call \
+ --genome reference/hg19.fa \
+ --vcffile SVvariants/sv.bcf \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12878.geno.bcf \
+ bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam &
 
-#NA12891
-delly call -g reference/hg19.fa -v SVvariants/sv.bcf -o SVvariants/NA12891.geno.bcf -x reference/hg19.excl bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
+# NA12891
+delly call \
+ --genome reference/hg19.fa \
+ --vcffile SVvariants/sv.bcf \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12891.geno.bcf \
+ bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam &
 
-#NA12892
-delly call -g reference/hg19.fa -v SVvariants/sv.bcf -o SVvariants/NA12892.geno.bcf -x reference/hg19.excl bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
+# NA12892
+delly call \
+ --genome reference/hg19.fa \
+ --vcffile SVvariants/sv.bcf \
+ --exclude reference/hg19.excl \
+ --outfile SVvariants/NA12892.geno.bcf \
+ bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam &
+ 
+ wait
 ```
 
 Look at the output:
@@ -372,16 +432,22 @@ We now have our good candidate list genotype for each individual.
 Merge all re-genotyped samples to get a single VCF/BCF using bcftools merge. Also index the resulting file and create vcf file for visualization.
 
 ```
-bcftools merge -O b -o SVvariants/merged.bcf SVvariants/NA12878.geno.bcf SVvariants/NA12891.geno.bcf SVvariants/NA12892.geno.bcf
+bcftools merge \
+ --output-type b \
+ --output SVvariants/merged.bcf \
+ SVvariants/NA12878.geno.bcf SVvariants/NA12891.geno.bcf SVvariants/NA12892.geno.bcf
+
 bcftools index SVvariants/merged.bcf
+
 bcftools view SVvariants/merged.bcf > SVvariants/merged.vcf
+
 bgzip -c SVvariants/merged.vcf > SVvariants/merged.vcf.gz
+
 tabix -fp vcf SVvariants/merged.vcf.gz
 ```
 
 
-**Do you know how to look at the resulting file?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_vcf3.md)
-
+**Do you know how to look at the resulting file?** [solution](./solutions/_vcf3.md)
 
 
 ## Setting up IGV for SV visualization
@@ -408,7 +474,7 @@ Now load the bam files in the same way using:
 
 You should see something like this:
 
-<img src="https://github.com/mbourgey/CBW_HTseq_module5/blob/master/img/deletion.png?raw=true" alt="Deletion" width="750" /> 
+![](img/deletion.png | width=750)
 
 You can try to configure IGV such that we can more clearly see the alignments that support the SV prediction.
 
@@ -418,22 +484,21 @@ You can try to configure IGV such that we can more clearly see the alignments th
 ## Explore the SVs
 <a name="explore"></a>
 
-**Is the variant at chr20:31,310,769-31,312,959 found in each member of the trio?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_igv1.md)
+**Is the variant at chr20:31,310,769-31,312,959 found in each member of the trio?** [solution](./solutions/_igv1.md)
 
-**What are the genotypes for each member of the trio at the locus chr20:61,721,523-61,728,495  (e.g., hemizygous, homozygous)?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_igv2.md) 
+**What are the genotypes for each member of the trio at the locus chr20:61,721,523-61,728,495  (e.g., hemizygous, homozygous)?** [solution](./solutions/_igv2.md) 
 
-**What about the variant at chr20:52,632,182-52,664,108?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_igv3.md)
+**What about the variant at chr20:52,632,182-52,664,108?** [solution](./solutions/_igv3.md)
 
 Now load the bam files in 
 
  * http://ht.oicrcbw.ca/HTseq/Module5/saved_results/Moleculo_bam/NA12878.molelculo.chr20.bam
 
-**Does the evidence in the Moleculo track mimic the evidence in the Illumina track for NA12878?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_igv4.md)
+**Does the evidence in the Moleculo track mimic the evidence in the Illumina track for NA12878?** [solution](./solutions/_igv4.md)
 
-**What about chr20:18,953,476-18,957,998?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_igv5.md)
+**What about chr20:18,953,476-18,957,998?** [solution](./solutions/_igv5.md)
 
 Continue exploring the data!
-
 
 
 ## Acknowledgements
