@@ -14,10 +14,10 @@ home: https://bioinformaticsdotca.github.io/htseq_2020
 
 -----------------------
 
-# CBW HT-seq Module 5 - Structural Variant Calling   
+# CBW HT-seq Module 5 - Structural Variant Calling
 
  Created by Mathieu Bourgey, _Ph.D_, then modified by Pascale Marquis and Rob Syme
- 
+
 
 ## Table of contents
 1. [Introduction](#introduction)
@@ -33,11 +33,11 @@ home: https://bioinformaticsdotca.github.io/htseq_2020
 ## Introduction
 <a name="introduction"></a>
 
-The goal of this practical session is to identify structural variants (SVs) in a human genome by identifying both discordant paired-end alignments and split-read alignments that. 
+The goal of this practical session is to identify structural variants (SVs) in a human genome by identifying both discordant paired-end alignments and split-read alignments that.
 
-Discordant paired-end alignments conflict with the alignment patterns that we expect (i.e., concordant alignments) for the DNA library and sequencing technology we have used. 
+Discordant paired-end alignments conflict with the alignment patterns that we expect (i.e., concordant alignments) for the DNA library and sequencing technology we have used.
 
-For example, given a ~500bp paired-end Illumina library, we expect pairs to align in F/R orientation and we expect the ends of the pair to align roughly 500bp apart. Pairs that align too far apart suggest a potential deletion in the DNA sample's genome. As you may have guessed, the trick is how we define what "too far" is --- this depends on the fragment size distribution of the data. 
+For example, given a ~500bp paired-end Illumina library, we expect pairs to align in F/R orientation and we expect the ends of the pair to align roughly 500bp apart. Pairs that align too far apart suggest a potential deletion in the DNA sample's genome. As you may have guessed, the trick is how we define what "too far" is --- this depends on the fragment size distribution of the data.
 
 
 Split-read alignments contain SV breakpoints and consequently, then DNA sequences up- and down-stream of the breakpoint align to disjoint locations in the reference genome.
@@ -60,7 +60,7 @@ We're going to focus on the reads extracted from the chromosome 20.
 
 ### Amazon node
 
-Read these [directions](http://bioinformaticsdotca.github.io/AWS_setup) for information on how to log in to your assigned Amazon node. 
+Read these [directions](http://bioinformaticsdotca.github.io/AWS_setup) for information on how to log in to your assigned Amazon node.
 
 ### Software requirements
 
@@ -73,9 +73,9 @@ These are all already installed, but here are the original links.
   * [LUMPY](https://github.com/arq5x/lumpy-sv)
   * [R](https://cran.r-project.org/)
   * [python](https://www.python.org/)
-  
-  
-In this session, we will particularly focus on DELLY, a SV detection tool. DELLY is an integrated structural variant prediction method that can discover, genotype and visualize deletions, tandem duplications, inversions and translocations at single-nucleotide resolution in short-read massively parallel sequencing data. It uses paired-ends and split-reads to sensitively and accurately delineate genomic rearrangements throughout the genome. 
+
+
+In this session, we will particularly focus on DELLY, a SV detection tool. DELLY is an integrated structural variant prediction method that can discover, genotype and visualize deletions, tandem duplications, inversions and translocations at single-nucleotide resolution in short-read massively parallel sequencing data. It uses paired-ends and split-reads to sensitively and accurately delineate genomic rearrangements throughout the genome.
 
 If you are interested in DELLY, you can read the full manuscript [here](http://bioinformatics.oxfordjournals.org/content/28/18/i333.abstract).
 
@@ -115,10 +115,10 @@ module load \
 
 ***Note:***
     The `ln -s` command adds symbolic links of all of the files contained in the (read-only) `~/CourseData/HT_data/Module5` directory.
-    
+
 ### Data files
 
-The initial structure of your folders should look like this:   
+The initial structure of your folders should look like this:
 
 
 ```console
@@ -184,22 +184,22 @@ bwa mem -M -t 2 \
 ```
 
 
-**Why should we mark shorter split hits as secondary ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_aln1.md)
+**Why should we mark shorter split hits as secondary ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_aln1.md)
 
 
 ## Characterize the fragment size distribution
 <a name="fragments"></a>
 
-Before we can attempt to identify structural variants via discordant alignments, we must first characterize the insert size distribution 
+Before we can attempt to identify structural variants via discordant alignments, we must first characterize the insert size distribution
 
-**What do we mean by "the insert size distribution"?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_fragment1.md)
+**What do we mean by "the insert size distribution"?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_fragment1.md)
 
-**How can we use the fragment size distribution in SV detection ?** [solution](https://github.com/mbourgey/CBW_HTseq_module5/blob/master/solutions/_fragment2.md)
+**How can we use the fragment size distribution in SV detection ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_fragment2.md)
 
 
 The following script, taken from LUMPY extracts F/R pairs from a BAM file and computes the mean and stdev of the F/R alignments. It also generates a density plot of the fragment size distribution.
 
-Let's calculate the fragment distribution for the three dataset: 
+Let's calculate the fragment distribution for the three dataset:
 
 ```bash
 # NA12878
@@ -213,7 +213,7 @@ samtools view bam/NA12878/NA12878_S1.chr20.20X.pairs.readSorted.bam \
 > SVvariants/NA12878_S1.chr20.20X.pairs.params
 
 
-# NA12891 
+# NA12891
 samtools view bam/NA12891/NA12891_S1.chr20.20X.pairs.readSorted.bam \
 | python scripts/pairend_distro.py \
   -r 101 \
@@ -268,13 +268,13 @@ Now, within R, execute the following commands:
 
 ```R
 size_dist <- read.table('SVvariants/NA12878_S1.chr20.20X.pairs.histo')
-pdf(file = "SVvariants/fragment.hist.pdf") 
+pdf(file = "SVvariants/fragment.hist.pdf")
 layout(matrix(1:3))
-plot(size_dist[,1], size_dist[,2], type='h', main="NA12878 insert size") 
-size_dist <- read.table('SVvariants/NA12891_S1.chr20.20X.pairs.histo') 
-plot(size_dist[,1], size_dist[,2], type='h', main="NA12891 insert size") 
-size_dist <- read.table('SVvariants/NA12892_S1.chr20.20X.pairs.histo') 
-plot(size_dist[,1], size_dist[,2], type='h', main="NA12892 insert size") 
+plot(size_dist[,1], size_dist[,2], type='h', main="NA12878 insert size")
+size_dist <- read.table('SVvariants/NA12891_S1.chr20.20X.pairs.histo')
+plot(size_dist[,1], size_dist[,2], type='h', main="NA12891 insert size")
+size_dist <- read.table('SVvariants/NA12892_S1.chr20.20X.pairs.histo')
+plot(size_dist[,1], size_dist[,2], type='h', main="NA12892 insert size")
 dev.off()
 quit("no")
 ```
@@ -303,13 +303,13 @@ rsync YOURUSERNAMEHERE@login1.CBW.calculquebec.cloud:~/workspace/HTseq/Module5/S
 
 This will copy the file onto your local computer where you can view the distributions. Spend some time thinking about what this plot means for identifying discordant alignments.
 
-**What does the mean fragment size appear to be? Are all 3 graphs the same?** [solution](./solutions/_insert1.md)
+**What does the mean fragment size appear to be? Are all 3 graphs the same?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_insert1.md)
 
 
 ## SV detection
 <a name="delly"></a>
 
-For germline SVs, calling is done by sample or in small batches to increase SV sensitivity & breakpoint precision. 
+For germline SVs, calling is done by sample or in small batches to increase SV sensitivity & breakpoint precision.
 
 Here are the steps adapted from the DELLY [readme](https://github.com/tobiasrausch/delly/blob/master/README.md).
 
@@ -351,9 +351,9 @@ bcftools view SVvariants/NA12878.bcf | less -S
 
 ***Cheat:*** These commands take a little under 5 minutes each to run. If these commands are taking too long, simply run the command `cp saved_results/SVvariants/NA128*[128].bc* SVvariants/`
 
-**How many variants delly found in each sample ?** [solution](./solutions/_vcf1.md)
+**How many variants delly found in each sample ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_vcf1.md)
 
-**How many variants by SV type are found in each sample ?** [solution](./solutions/_vcf4.md)
+**How many variants by SV type are found in each sample ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_vcf4.md)
 
 ### Merge calls
 
@@ -376,9 +376,9 @@ bcftools view SVvariants/sv.bcf | less -S
 ```
 
 
-**How many variants by SV type are found ?** [solution](./solutions/_vcf5.md)
+**How many variants by SV type are found ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_vcf5.md)
 
-**What can you notice something different from the individual bcf ?** [solution](./solutions/_vcf2.md)
+**What can you notice something different from the individual bcf ?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_vcf2.md)
 
 
 ### Re-genotype in all samples
@@ -409,7 +409,7 @@ delly call \
  --exclude reference/hg19.excl \
  --outfile SVvariants/NA12892.geno.bcf \
  bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam &
- 
+
  wait
 ```
 
@@ -442,7 +442,7 @@ tabix -fp vcf SVvariants/merged.vcf.gz
 ```
 
 
-**Do you know how to look at the resulting file?** [solution](./solutions/_vcf3.md)
+**Do you know how to look at the resulting file?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_vcf3.md)
 
 
 ## Setting up IGV for SV visualization
@@ -474,24 +474,24 @@ You should see something like this:
 You can try to configure IGV such that we can more clearly see the alignments that support the SV prediction.
 
 ***Note*** - Do you remember how to make sure that the alignments are colored by insert size and orientation?*
- 
+
 
 ## Explore the SVs
 <a name="explore"></a>
 
-**Is the variant at chr20:31,310,769-31,312,959 found in each member of the trio?** [solution](./solutions/_igv1.md)
+**Is the variant at chr20:31,310,769-31,312,959 found in each member of the trio?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv1.md)
 
-**What are the genotypes for each member of the trio at the locus chr20:61,721,523-61,728,495  (e.g., hemizygous, homozygous)?** [solution](./solutions/_igv2.md) 
+**What are the genotypes for each member of the trio at the locus chr20:61,721,523-61,728,495  (e.g., hemizygous, homozygous)?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv2.md)
 
-**What about the variant at chr20:52,632,182-52,664,108?** [solution](./solutions/_igv3.md)
+**What about the variant at chr20:52,632,182-52,664,108?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv3.md)
 
-Now load the bam files in 
+Now load the bam files in
 
  * http://ht.oicrcbw.ca/HTseq/Module5/saved_results/Moleculo_bam/NA12878.molelculo.chr20.bam
 
-**Does the evidence in the Moleculo track mimic the evidence in the Illumina track for NA12878?** [solution](./solutions/_igv4.md)
+**Does the evidence in the Moleculo track mimic the evidence in the Illumina track for NA12878?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv4.md)
 
-**What about chr20:18,953,476-18,957,998?** [solution](./solutions/_igv5.md)
+**What about chr20:18,953,476-18,957,998?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv5.md)
 
 Continue exploring the data!
 
@@ -499,5 +499,5 @@ Continue exploring the data!
 ## Acknowledgements
 <a name="ackno"></a>
 
-This module is heavily based on a previous module prepared by Aaron Quinlan and Guillaume Bourque. 
+This module is heavily based on a previous module prepared by Aaron Quinlan and Guillaume Bourque.
 
