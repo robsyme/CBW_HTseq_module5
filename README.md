@@ -121,7 +121,7 @@ module load \
 The initial structure of your folders should look like this:   
 
 
-```
+```console
 [user@node1 ref]$ cd $WORK_DIR_M3
 [user@node1 ref]$ tree -d *
 bam
@@ -285,7 +285,7 @@ quit("no")
 
 At this point, you should have the following files:
 
-```shell
+```console
 [user@node1 Module5]$ tree SVvariants/
 SVvariants/
 ├── fragment.hist.pdf
