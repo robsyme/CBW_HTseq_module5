@@ -1,10 +1,10 @@
 You can estimate the raw number of variant in each sample using the following command:
 
 ```bash
-for i in SVvariants/*bcf ; do
- echo $i
- bcftools view $i | grep -v "^#" | wc -l
-done
+for i in SVvariants/*bcf; do
+  basename $i .bcf
+  bcftools view --no-header $i | wc -l
+done | paste - - | column -t
 ```
 
 You should get:
