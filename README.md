@@ -150,7 +150,7 @@ This step has been done for you in the interest of time, but the commands are sh
 
 In the alignment commands, note the use of the -M parameter to mark shorter split hits as secondary.
 
-```
+```bash
 ### NOTE: These preparatory commands have already been run for you and the outputs supplied.
 ###       The code is given here as a reference only.
 ###       You don't need to run this block.
@@ -244,7 +244,7 @@ samtools view bam/NA12892/NA12892_S1.chr20.20X.pairs.readSorted.bam \
 
 Let's take a peak at the first few lines of the histogram file that was produced:
 
-```
+```bash
 head -n 10 SVvariants/NA12878_S1.chr20.20X.pairs.histo
 ```
 
@@ -267,7 +267,7 @@ Let's use R to plot the fragment size distribution.
 
 First, launch R from the command line.
 
-```
+```bash
 R
 ```
 
@@ -422,7 +422,7 @@ delly call \
 
 Look at the output:
 
-```
+```bash
 bcftools view SVvariants/NA12878.geno.bcf | less -S
 ```
 
@@ -433,7 +433,7 @@ We now have our good candidate list genotype for each individual.
 
 Merge all re-genotyped samples to get a single VCF/BCF using bcftools merge. Also index the resulting file and create vcf file for visualization.
 
-```
+```bash
 bcftools merge \
  --output-type b \
  --output SVvariants/merged.bcf \
