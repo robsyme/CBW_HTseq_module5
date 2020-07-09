@@ -1,4 +1,4 @@
-what we see in molleculo:
+What we see from the molleculo data:
 
 * chr20:31,310,769-31,312,959 - yes
 * chr20:61,721,523-61,728,495 - yes
