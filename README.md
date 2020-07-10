@@ -50,7 +50,7 @@ The dataset comes from the [Illumina Platinum Genomes Project](http://www.illumi
 
 NA12878 is the child of the trio while NA12891 and NA12892 are her parents.
 
-![Pedigree](img/Pedigree.png) <!-- .element width="750" -->
+<img src="./img/Pedigree.png?raw=true" alt="Pedigree" width="100%" />
 
 For practical reasons we subsampled the reads from the sample because running the whole dataset would take way too much time and resources.
 We're going to focus on the reads extracted from the chromosome 20.
@@ -466,7 +466,7 @@ Now load the bam files in the same way using:
 
 You should see something like this:
 
-![](img/deletion.png) <!-- .element width="750" -->
+<img src="./img/deletion.png?raw=true" alt="Deletion" width="100%" />
 
 You can try to configure IGV such that we can more clearly see the alignments that support the SV prediction.
 
