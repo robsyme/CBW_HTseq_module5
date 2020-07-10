@@ -58,9 +58,6 @@ We're going to focus on the reads extracted from the chromosome 20.
 ## Original Setup
 <a name="setup"></a>
 
-### Amazon node
-
-Read these [directions](http://bioinformaticsdotca.github.io/AWS_setup) for information on how to log in to your assigned Amazon node.
 
 ### Software requirements
 
@@ -451,8 +448,8 @@ tabix -fp vcf SVvariants/merged.vcf.gz
 Launch IGV and load the merged calls and the germline calls using `File -> Load from URL` using:
 
 
- * http://XX.oicrcbw.ca/HTseq/Module5/SVvariants/merged.vcf.gz
- * http://XX.oicrcbw.ca/HTseq/Module5/SVvariants/merged.vcf.gz.tbi
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/SVvariants/merged.vcf.gz
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/SVvariants/merged.vcf.gz.tbi
 
 
 ***Note:*** Once again you will need to replace `XX` by your student number.
@@ -462,9 +459,9 @@ Navigate to the following location to see a deletion: `chr20:31,308,410-31,315,2
 
 Now load the bam files in the same way using:
 
- * http://XX.oicrcbw.ca/HTseq/Module5/bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
- * http://XX.oicrcbw.ca/HTseq/Module5/bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
- * http://XX.oicrcbw.ca/HTseq/Module5/bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
 
 
 You should see something like this:
@@ -487,7 +484,7 @@ You can try to configure IGV such that we can more clearly see the alignments th
 
 Now load the bam files in
 
- * http://ht.oicrcbw.ca/HTseq/Module5/saved_results/Moleculo_bam/NA12878.molelculo.chr20.bam
+ * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/saved_results/Moleculo_bam/NA12878.molelculo.chr20.bam
 
 **Does the evidence in the Moleculo track mimic the evidence in the Illumina track for NA12878?** [solution](https://github.com/robsyme/CBW_HTseq_module5/blob/master/solutions/_igv4.md)
 
