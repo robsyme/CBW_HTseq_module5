@@ -94,8 +94,8 @@ We'll create a directory in which to do the module 5 lab:
 
 ```bash
 export WORK_DIR_M3=$HOME/workspace/HTseq/Module5
-mkdir -p $WORK_DIR_M3
-cd $WORK_DIR_M3
+mkdir -p $WORK_DIR_M5
+cd $WORK_DIR_M5
 ln -s $HOME/CourseData/HT_data/Module5/* .
 
 module load \
