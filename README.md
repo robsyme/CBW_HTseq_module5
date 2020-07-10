@@ -452,17 +452,14 @@ Launch IGV and load the merged calls and the germline calls using `File -> Load 
  * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/SVvariants/merged.vcf.gz.tbi
 
 
-***Note:*** Once again you will need to replace `XX` by your student number.
-
-Navigate to the following location to see a deletion: `chr20:31,308,410-31,315,294`
-
-
 Now load the bam files in the same way using:
 
  * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12878/NA12878_S1.chr20.20X.pairs.posSorted.bam
  * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12891/NA12891_S1.chr20.20X.pairs.posSorted.bam
  * https://datahub-39-cm2.p.genap.ca/HTseq/Module5/bam/NA12892/NA12892_S1.chr20.20X.pairs.posSorted.bam
 
+
+Navigate to the following location to see a deletion: `chr20:31,308,410-31,315,294`
 
 You should see something like this:
 
